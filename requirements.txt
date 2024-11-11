@@ -1,0 +1,6 @@
+google-generativeai
+instaloader
+pillow
+vinted_scraper
+numpy
+pandas
