@@ -19,7 +19,7 @@ os.environ["API_KEY"] = "your_api_key"
 genai.configure(api_key=os.environ["API_KEY"])
 
 
-def load_insta_images(mypath: Path, insta_user: str) -> List[Image]:
+def load_insta_images(mypath: Path, insta_user: str) -> List:
     MyImage = namedtuple('MyImage', ['name', 'content'])
     counter = 0
     files = []
@@ -40,14 +40,15 @@ def analyze_user_and_suggest(user_path: Path, user_name: str) -> str:
     return response.text
 
 
-def retrieve_photo(request: str, dataset: DataFrame) -> None:
+def retrieve_photo(request: str, dataset: Path) -> None:
+    insta_dataframe = pd.read_csv(dataset)
     request_embed = genai.embed_content(model="models/text-embedding-004",
                                   content=request,
                                   task_type="retrieval_query")
-    dataset['Embeddings'] = dataset['Embeddings'].apply(lambda x: [float(x) for x in x.replace("[", "").replace("]", "").split(',')])
-    dot_products = np.dot(np.stack(dataset['Embeddings']), np.array(request_embed["embedding"]).reshape(-1))
+    insta_dataframe['Embeddings'] = insta_dataframe['Embeddings'].apply(lambda x: [float(x) for x in x.replace("[", "").replace("]", "").split(',')])
+    dot_products = np.dot(np.stack(insta_dataframe['Embeddings']), np.array(request_embed["embedding"]).reshape(-1))
     idx = np.argmax(dot_products)
-    suggestion = dataset.iloc[idx]["Photo_id"]  # Return text from index with max value
+    suggestion = insta_dataframe.iloc[idx]["Photo_id"]  # Return text from index with max value
     im = Image.open(suggestion)
     im.show()
 
@@ -139,7 +140,7 @@ def create_photo_dataframe(photos: List[dict]) -> None:
     df = pd.DataFrame(photos)
     df.columns = ['Photo_id', 'Style', 'Description']
     df['Embeddings'] = df.apply(lambda row: embed_fn(row['Style'], row['Description']), axis=1)
-    df.to_csv('insta_outfit_dataset.csv', index=False)
+    df.to_csv('data\\insta_outfit_dataset.csv', index=False)
     # save dataframe to disk
 
 
@@ -149,23 +150,23 @@ if __name__=="__main__":
     use_case = vars(arg_parser.parse_args())['use_case']
 
     # Paths for various use cases
-    selection = "data\\selection" # change paths for Mac and Linux 
+    selection = "data\\selection" # change paths for Mac and Linux
     user_path = "data\\lara_bsmnn\\selection"
     photo_path = "data\\to_suggest"
     insta_dataframe = pd.read_csv('insta_outfit_dataset.csv')
 
     match use_case:
 
-        case 0:
+        case '0':
             # create dataframe with embedded photo descriptions
             insta_dataset = create_photo_dataset(selection)
             create_photo_dataframe(insta_dataset)
-            insta_dataframe = pd.read_csv('insta_outfit_dataset_example.csv')
+
 
         case '1':
-            use_case_1 = "suggest me a trendy look with knee high boots"
+            use_case_1 = "suggest me a trendy look with brown colors"
             # we will retrieve a photo from the dataframe based on photo descriptions
-            retrieve_photo(use_case_1, insta_dataframe)
+            retrieve_photo(use_case_1, 'data\\insta_outfit_dataset.csv')
 
         case '2':
             use_case_2 = "create me an outfit in the style of instagram influencer lara_bsmnn"
@@ -188,18 +189,3 @@ if __name__=="__main__":
             look_items = photo_look.split(';')
             show_outfit_on_vinted(look_items)
 
-
-
-
-
-
-
-
-
-    # use case 2
-
-
-    # use case 3
-
-
-    # use case 4
