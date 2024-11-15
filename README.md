@@ -39,16 +39,18 @@ For this purpose, a selection of images was described by Gemini; it identified t
     pip install -r requirements.txt
     ```
 
-    - Run the file ```ai_for_fashion.py``` indicating the number of the use case as ```-c``` parameter:
-   
-      ```
-      python ai_for_fashion.py -c <number between 0 and 4>
-      ```
-    - In the file ```ai_for_fashion.py``` add your Google API key:
+- In the file ```ai_for_fashion.py``` add your Google API key:
       
       ```
       os.environ["API_KEY"] = "YOUR_API_KEY"
       ```  
 
+
+- Run the file ```ai_for_fashion.py``` indicating the number of the use case as ```-c``` parameter:
+   
+      ```
+      python ai_for_fashion.py -c <number between 0 and 4>
+      ```
+   
 
 
